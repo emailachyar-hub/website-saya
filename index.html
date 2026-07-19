@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>Poster Generator + Watermark</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body {
+        background: #eef2f5;
+        padding: 20px;
+      }
+
+      .wrap {
+        display: flex;
+        gap: 20px;
+      }
+
+      .left {
+        width: 340px;
+
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .panel {
+        background: #fff;
+        padding: 18px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      }
+
+      .panel h2 {
+        font-size: 18px;
+        margin-bottom: 15px;
+      }
+
+      label {
+        display: block;
+        margin-top: 10px;
+        font-size: 14px;
+        font-weight: bold;
+      }
+
+      input[type="file"],
+      input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin-top: 6px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        margin-top: 8px;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 8px;
+        background: #1976d2;
+        color: #fff;
+        font-size: 15px;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+
+      button:hover {
+        background: #125ca8;
+      }
+
+      button:disabled {
+        background: #999;
+        cursor: not-allowed;
+      }
+
+      #copyBtn {
+        display: none;
+      }
+
+      #loading {
+        display: none;
+        margin-top: 15px;
+      }
+
+      .bar {
+        width: 100%;
+        height: 8px;
+        background: #ddd;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-top: 10px;
+      }
+
+      .fill {
+        height: 100%;
+        width: 0%;
+        background: #4caf50;
+        transition: 0.2s;
+      }
+
+      .status {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #444;
+      }
+
+      .right {
+        flex: 1;
+      }
+
+      .canvasPanel {
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      }
+
+      canvas {
+        max-width: 100%;
+        border: 1px solid #ccc;
+        cursor: move;
+        display: block;
+        margin: auto;
+      }
+
+      .success {
+        margin-top: 10px;
+        color: green;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <div class="left">
+        <div class="panel">
+          <h2>📝 Generator Prompt</h2>
+
+          <label>
+            Isi Materi
+
+            <input id="materi" type="text" placeholder="Contoh : Flu Burung" />
+          </label>
+
+          <button id="generatePrompt">Generate Prompt</button>
+
+          <p id="wordCounter" style="margin-top: 10px; font-size: 13px">
+            <b><span id="wordCount">0</span> kata</b>
+            <span style="color: #777">(ideal 120–220)</span>
+          </p>
+
+          <div id="loading">
+            <div class="bar">
+              <div class="fill" id="fill"></div>
+            </div>
+
+            <div class="status" id="status">Sedang membuat prompt...</div>
+          </div>
+
+          <button id="copyBtn">📋 Salin Prompt</button>
+
+          <div class="success" id="copyInfo"></div>
+        </div>
+
+        <div class="panel">
+          <h2>🖼 Watermark</h2>
+
+          <label>
+            Gambar Utama
+
+            <input type="file" id="bgFile" accept="image/*" />
+          </label>
+
+          <label>
+            Logo
+
+            <input type="file" id="logoFile" accept="image/*" />
+          </label>
+
+          <label>
+            Ukuran Logo
+
+            <input type="range" id="size" min="20" max="800" value="800" />
+          </label>
+
+          <button id="removeLogo">Hapus Logo</button>
+
+          <button id="download">Download PNG</button>
+
+          <p style="margin-top: 10px; font-size: 13px">
+            Drag logo hanya ke atas dan bawah.
+          </p>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="canvasPanel">
+          <canvas id="canvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let FINAL_PROMPT = "";
+
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const bg = new Image();
+      const logo = new Image();
+
+      let bgOk = false;
+      let logoOk = false;
+
+      let lx = 0;
+      let ly = 0;
+
+      let lw = 150;
+      let lh = 150;
+
+      let drag = false;
+
+      let dx = 0;
+      let dy = 0;
+
+      function redraw() {
+        if (!bgOk) return;
+
+        canvas.width = bg.width;
+        canvas.height = bg.height;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.drawImage(bg, 0, 0);
+
+        if (logoOk) {
+          ctx.drawImage(logo, lx, ly, lw, lh);
+        }
+      }
+      bgFile.onchange = (e) => {
+        const f = e.target.files[0];
+
+        if (!f) return;
+
+        const r = new FileReader();
+
+        r.onload = (ev) => {
+          bg.onload = () => {
+            bgOk = true;
+
+            if (logoOk) {
+              lx = (bg.width - lw) / 2;
+              ly = 0;
+            }
+
+            redraw();
+          };
+
+          bg.src = ev.target.result;
+        };
+
+        r.readAsDataURL(f);
+      };
+
+      logoFile.onchange = (e) => {
+        const f = e.target.files[0];
+
+        if (!f) return;
+
+        const r = new FileReader();
+
+        r.onload = (ev) => {
+          logo.onload = () => {
+            logoOk = true;
+
+            const ratio = logo.width / logo.height;
+
+            lw = bg.width * 0.7;
+
+            size.value = Math.round(lw);
+
+            lh = lw / ratio;
+
+            if (lh > bg.height) {
+              lh = bg.height;
+
+              lw = lh * ratio;
+            }
+
+            lx = (bg.width - lw) / 2;
+
+            ly = 0;
+
+            redraw();
+          };
+
+          logo.src = ev.target.result;
+        };
+
+        r.readAsDataURL(f);
+      };
+
+      size.oninput = () => {
+        if (!logoOk) return;
+
+        const ratio = logo.width / logo.height;
+
+        const centerX = lx + lw / 2;
+
+        const centerY = ly + lh / 2;
+
+        lw = Number(size.value);
+
+        lh = lw / ratio;
+
+        lx = centerX - lw / 2;
+
+        ly = centerY - lh / 2;
+
+        redraw();
+      };
+
+      canvas.onmousedown = (e) => {
+        if (!logoOk) return;
+
+        const rect = canvas.getBoundingClientRect();
+
+        const sx = canvas.width / rect.width;
+
+        const sy = canvas.height / rect.height;
+
+        const mx = (e.clientX - rect.left) * sx;
+
+        const my = (e.clientY - rect.top) * sy;
+
+        if (mx >= lx && mx <= lx + lw && my >= ly && my <= ly + lh) {
+          drag = true;
+
+          dx = mx - lx;
+
+          dy = my - ly;
+        }
+      };
+
+      window.onmouseup = () => {
+        drag = false;
+      };
+
+      canvas.onmousemove = (e) => {
+        if (!drag) return;
+
+        const rect = canvas.getBoundingClientRect();
+
+        const sx = canvas.width / rect.width;
+
+        const sy = canvas.height / rect.height;
+
+        ly = (e.clientY - rect.left) * 0;
+
+        ly = (e.clientY - rect.top) * sy - dy;
+
+        redraw();
+      };
+
+      removeLogo.onclick = () => {
+        logoOk = false;
+
+        redraw();
+      };
+
+      download.onclick = () => {
+        if (!bgOk) {
+          alert("Upload gambar utama terlebih dahulu.");
+
+          return;
+        }
+
+        const a = document.createElement("a");
+
+        a.download = "hasil.png";
+
+        a.href = canvas.toDataURL("image/png");
+
+        a.click();
+      };
+
+      const loading = document.getElementById("loading");
+      const fill = document.getElementById("fill");
+      const status = document.getElementById("status");
+      const copyBtn = document.getElementById("copyBtn");
+      const copyInfo = document.getElementById("copyInfo");
+      const materiInput = document.getElementById("materi");
+      const wordCount = document.getElementById("wordCount");
+      const wordCounter = document.getElementById("wordCounter");
+      function updateWordCount() {
+        const text = materiInput.value.trim();
+
+        const count = text === "" ? 0 : text.split(/\s+/).length;
+
+        wordCount.textContent = count;
+
+        if (count < 120) {
+          wordCounter.style.color = "#212121";
+        } else if (count <= 220) {
+          wordCounter.style.color = "#43A047";
+        } else {
+          wordCounter.style.color = "#d32f2f";
+        }
+      }
+      materiInput.addEventListener("input", updateWordCount);
+      updateWordCount();
+      document.getElementById("generatePrompt").onclick = () => {
+        const materi = document.getElementById("materi").value.trim();
+
+        if (materi == "") {
+          alert("Silakan isi materi terlebih dahulu.");
+
+          return;
+        }
+
+        copyBtn.style.display = "none";
+        copyInfo.innerHTML = "";
+
+        loading.style.display = "block";
+
+        fill.style.width = "0%";
+
+        status.innerHTML = "Sedang membuat prompt...";
+
+        let p = 0;
+
+        const timer = setInterval(() => {
+          p += 5;
+
+          fill.style.width = p + "%";
+
+          if (p >= 100) {
+            clearInterval(timer);
+
+            loading.style.display = "none";
+
+            copyBtn.style.display = "block";
+
+            status.innerHTML = "";
+
+            FINAL_PROMPT = `Buat 1 GAMBAR POSTER INFOGRAFIS kesehatan profesional.
+
+WAJIB:
+- HASIL AKHIR HARUS BERUPA GAMBAR, bukan penjelasan.
+- Jangan membahas materi.
+- Jangan menampilkan analisis.
+- Langsung hasilkan gambar.
+
+KUALITAS DESAIN WAJIB:
+- Gunakan gaya infografis kesehatan modern khas kampanye kesehatan pemerintah Indonesia dan Puskesmas profesional.
+- Gunakan ilustrasi kartun vektor premium, karakter ramah keluarga Indonesia, outline halus, shading lembut, dan warna cerah.
+- Layout menggunakan card system modular dengan panel rounded rectangle, bubble, badge, ribbon title, dan section terpisah.
+- Gunakan headline besar rounded bold dengan outline putih tebal dan shadow lembut.
+- Semua teks harus sangat tajam, jelas, anti blur, anti glitch, anti artefak AI.
+DOMINASI WARNA:
+- Pilih secara acak satu tema warna utama yang berbeda pada setiap generasi.
+- Gunakan maksimal 3 warna utama yang terdiri dari 1 warna primer, 1 warna sekunder, dan 1 warna aksen yang saling harmonis.
+- Warna wajib cerah, modern, bersih, profesional, memiliki kontras tinggi, serta nyaman dibaca pada seluruh elemen poster.
+- Terapkan palet warna secara konsisten pada background, card, panel, badge, ribbon, ikon, ilustrasi, heading, highlight, dan elemen dekoratif.
+- Background menggunakan soft gradient yang elegan dengan transisi halus, sedangkan card menggunakan warna solid atau semi transparan yang masih berada dalam satu palet.
+- Gunakan warna aksen hanya untuk menonjolkan informasi penting agar hirarki visual tetap jelas.
+- Hindari warna kusam, terlalu gelap, terlalu pucat, saturasi berlebihan, maupun kombinasi yang saling bertabrakan.
+- Setiap generasi wajib menghasilkan kombinasi warna yang berbeda tanpa mengurangi kesan profesional khas media promosi kesehatan pemerintah Indonesia.
+
+Pilih secara acak salah satu palet berikut:
+• Biru Medis + Cyan + Putih
+• Hijau Emerald + Mint + Putih
+• Biru Navy + Sky Blue + Putih
+• Teal + Aqua + Putih
+• Tosca + Biru Muda + Putih
+• Hijau Lime + Teal + Putih
+• Oranye + Kuning + Putih
+• Merah Coral + Peach + Putih
+• Ungu + Lavender + Putih
+• Indigo + Cyan + Putih
+• Pink + Magenta + Putih
+• Coklat Muda + Cream + Putih
+• Biru + Hijau + Putih
+• Orange + Biru + Putih
+• Merah + Navy + Putih
+
+Gunakan warna secara seimbang sehingga poster terlihat premium, bersih, modern, mudah dibaca, dan layak dipublikasikan di media sosial.
+- Background menggunakan gradient lembut dan bentuk gelombang organik modern.
+- Gunakan ilustrasi tenaga kesehatan, keluarga, anak, ikon medis, dan elemen edukasi sesuai konteks materi.
+- Tambahkan dekorasi ringan seperti sparkles, shape abstrak, panah, daun, blob, dan icon pendukung.
+- Gunakan whitespace yang cukup dan hirarki visual yang sangat jelas.
+- Setiap generasi harus menghasilkan variasi layout berbeda namun mempertahankan identitas visual kesehatan pemerintah Indonesia.
+- Pilih secara acak salah satu komposisi: hero illustration kanan, kiri, tengah atas, timeline, dashboard modular, zig-zag flow, circular infographic, atau card grid layout.
+
+IDENTITAS INSTANSI:
+- Sisakan area kosong pada header mengikuti background.
+- Header menggunakan background yang sama dengan background utama.
+- Footer menggunakan ikon sosial media resmi dengan gaya modern rounded bar.
+
+MATERI:
+${materi}
+
+Setelah panel materi terakhir langsung tampilkan footer.
+
+Jangan membuat panel penutup.
+Jangan membuat ringkasan.
+Jangan membuat reminder.
+Jangan membuat kesimpulan.
+Jangan membuat tips.
+Jangan membuat CTA.
+
+Ukuran poster 1080×1350 px bukan 1024x1536 px.
+
+Sisakan placeholder bagian atas tanpa gambar.
+
+Footer hanya gunakan data berikut:
+
+Instagram : puskesmaslabanan
+Facebook : Puskesmas Labanan
+TikTok : Puskesmas.Labanan
+YouTube : Puskesmas Labanan Kabupaten Berau
+WhatsApp : 0822 5670 3297
+
+Output berupa gambar siap publikasi Instagram.`;
+          }
+        }, 80);
+      };
+
+      copyBtn.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(FINAL_PROMPT);
+
+          copyInfo.innerHTML = "✅ Prompt berhasil disalin.";
+        } catch (e) {
+          copyInfo.innerHTML = "❌ Browser tidak mengizinkan clipboard.";
+        }
+      };
+    </script>
+  </body>
+</html>
