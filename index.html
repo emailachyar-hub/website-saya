@@ -2,305 +2,521 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Diagram Pertumbuhan Anak - Roda Umur</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#f8fafc;font-family:Arial,sans-serif;color:#334155}
-.app{max-width:1100px;margin:auto;background:#fff;min-height:100vh;padding:12px;display:flex;flex-direction:column;align-items:center}
-h1{margin:0;color:#0f766e;font-size:clamp(20px,5vw,36px);text-align:center}
-.note{color:#64748b;margin:4px 0 12px;text-align:center;font-size:13px}
-.stage{display:flex;flex-direction:column;align-items:center;gap:15px;width:100%}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: #f0fdf4;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
 
-.wheel-area{width:min(94vw, 420px);aspect-ratio:1;position:relative;touch-action:none;user-select:none}
+.app {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 12px;
+    justify-content: space-between;
+}
 
-.wheel{position:absolute;inset:0;border-radius:50%;overflow:hidden;
-border:8px solid #f1f5f9;box-shadow:0 8px 28px rgba(0,0,0,0.08);cursor:grab;
-transition:transform .12s ease-out;z-index:5}
-.wheel.dragging{cursor:grabbing;transition:none}
-.wheel:before{content:"";position:absolute;inset:50%;width:22px;height:22px;
-transform:translate(-50%,-50%);border-radius:50%;background:#fbcfe8;border:2px solid #cbd5e1;z-index:20}
+header {
+    text-align: center;
+    flex-shrink: 0;
+}
 
-.pointer{position:absolute;z-index:40;top:-2px;left:50%;transform:translateX(-50%);
-width:100px;height:44px;background:#fff;border-radius:0 0 50px 50px;
-box-shadow:0 4px 12px rgba(0,0,0,0.08);text-align:center;padding-top:8px;border:2px solid #e2e8f0}
-.pointer b{display:block;color:#0f766e;font-size:16px}
+header h1 {
+    font-size: clamp(16px, 4.5vw, 22px);
+    color: #0f766e;
+    font-weight: 800;
+}
 
-.months{position:absolute;inset:0;z-index:2}
-.month{position:absolute;left:50%;top:50%;width:34px;height:18px;margin:-9px -17px;
-color:#1e293b;font-weight:bold;text-align:center;font-size:11px;text-shadow:0 1px 2px rgba(255,255,255,0.9)}
-.month span{display:inline-block}
+header .note {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.stage {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    max-height: calc(100vh - 100px);
+}
+
+.wheel-area {
+    width: min(85vw, 340px);
+    aspect-ratio: 1;
+    position: relative;
+    touch-action: none;
+    user-select: none;
+}
+
+.wheel {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 6px solid #e2e8f0;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    cursor: grab;
+    transition: transform 0.1s ease-out;
+    z-index: 5;
+}
+
+.wheel.dragging {
+    cursor: grabbing;
+    transition: none;
+}
+
+.wheel:before {
+    content: "";
+    position: absolute;
+    inset: 50%;
+    width: 18px;
+    height: 18px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: #fbcfe8;
+    border: 2px solid #cbd5e1;
+    z-index: 20;
+}
+
+.pointer {
+    position: absolute;
+    z-index: 40;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 85px;
+    height: 34px;
+    background: #fff;
+    border-radius: 0 0 40px 40px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    text-align: center;
+    padding-top: 5px;
+    border: 2px solid #cbd5e1;
+}
+
+.pointer b {
+    display: block;
+    color: #0f766e;
+    font-size: 13px;
+    line-height: 1.1;
+}
+
+.months {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+}
+
+.month {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 30px;
+    height: 16px;
+    margin: -8px -15px;
+    color: #1e293b;
+    font-weight: bold;
+    text-align: center;
+    font-size: 10px;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.9);
+}
+
+.month span {
+    display: inline-block;
+}
 
 /* Center Display di dalam roda */
 .wheel-center-display {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 78%;
-  height: 78%;
-  background: transparent;
-  border-radius: 0;
-  z-index: 25;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  pointer-events: none;
-  text-align: center;
-  border: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 76%;
+    height: 76%;
+    z-index: 25;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
 }
 
 .wheel-center-display .content-card,
 .wheel-center-display .btn-expand {
-  pointer-events: auto;
+    pointer-events: auto;
+}
+
+.content-card {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #ffffff;
+    border-radius: 50%;
+    padding: 22px 14px 18px 14px;
+    box-shadow: inset 0 0 12px rgba(244,114,182,0.15);
+    border: 2.5px solid #f472b6;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
 }
 
 /* Tombol Kaca Pembesar / Fullscreen */
 .btn-expand {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #f472b6;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-  z-index: 30;
-  transition: transform 0.2s;
-}
-
-.btn-expand:hover {
-  transform: scale(1.1);
-}
-
-/* Mode Fullscreen / Pembesar */
-.wheel-center-display.fullscreen {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  transform: none !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  border-radius: 0 !important;
-  z-index: 9999 !important;
-  padding: 24px !important;
-  background: rgba(255, 255, 255, 0.98) !important;
-  border: none !important;
-  box-shadow: none !important;
-  pointer-events: auto !important;
-  justify-content: center !important;
-}
-
-.wheel-center-display.fullscreen .content-card {
-  max-width: 500px;
-  padding: 16px;
-}
-
-.wheel-center-display.fullscreen table {
-  font-size: 13px;
-}
-
-.wheel-center-display.fullscreen th, 
-.wheel-center-display.fullscreen td {
-  padding: 8px 6px;
-}
-
-.wheel-center-display.fullscreen h3 {
-  font-size: 20px;
-  margin-bottom: 10px;
-}
-
-.wheel-center-display.fullscreen .vaccine-box {
-  font-size: 12px;
-  margin-top: 10px;
-  padding: 8px;
-}
-
-.wheel-center-display.fullscreen .vaccine-box b {
-  font-size: 13px;
-}
-
-.wheel-center-display.fullscreen .btn-expand {
-  width: 44px;
-  height: 44px;
-  font-size: 22px;
-  top: 15px;
-  right: 15px;
-}
-
-.content-card {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-  border: 2px solid #fce7f3;
-  position: relative;
+    position: absolute;
+    top: 8px;
+    right: 50%;
+    transform: translateX(50%);
+    background: #0f766e;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    z-index: 35;
+    display: flex;
+    align-items: center;
+    gap: 3px;
 }
 
 .wheel-center-display h3 {
-  margin: 0 0 4px 0;
-  font-size: 15px;
-  color: #db2777;
-  font-weight: 800;
+    margin: 8px 0 2px 0;
+    font-size: 13px;
+    color: #db2777;
+    font-weight: 800;
 }
 
 .center-table-wrap {
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1.5px solid #fce7f3;
+    width: 100%;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #fce7f3;
 }
 
 .wheel-center-display table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 10.5px;
-  background: #fff;
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9px;
+    background: #fff;
 }
 
 .wheel-center-display th, .wheel-center-display td {
-  border: 1px solid #fce7f3;
-  padding: 4px 2px;
-  text-align: center;
-  white-space: nowrap;
+    border: 1px solid #fce7f3;
+    padding: 3px 2px;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .wheel-center-display th {
-  background: #f472b6;
-  color: white;
-  font-weight: 600;
-  font-size: 11px;
+    background: #f472b6;
+    color: white;
+    font-weight: 600;
+    font-size: 9.5px;
 }
 
 .wheel-center-display th:first-child, .wheel-center-display td:first-child {
-  text-align: left;
-  background: #f472b6;
-  color: white;
-  font-weight: 600;
-  width: 34%;
-  padding-left: 6px;
-  font-size: 10px;
+    text-align: left;
+    background: #f472b6;
+    color: white;
+    font-weight: 600;
+    width: 32%;
+    padding-left: 4px;
+    font-size: 9px;
 }
 
-.col-val { width: 33%; }
+.col-val { width: 34%; }
 
-.boy{color:#2563eb;font-weight:bold}
-.girl{color:#db2777;font-weight:bold}
+.boy { color: #2563eb; font-weight: bold; }
+.girl { color: #db2777; font-weight: bold; }
 
 .sub-label {
-  font-size: 9px;
-  color: #64748b;
-  font-weight: normal;
-  display: block;
+    font-size: 8px;
+    color: #64748b;
+    font-weight: normal;
+    display: block;
 }
 
 .vaccine-box {
-  margin-top: 5px;
-  background: #fdf2f8;
-  border: 1.5px solid #fce7f3;
-  border-radius: 8px;
-  padding: 4px 6px;
-  width: 100%;
-  font-size: 10px;
-  color: #831843;
-  text-align: center;
+    background: #fdf2f8;
+    border: 1px solid #fce7f3;
+    border-radius: 6px;
+    padding: 3px 4px;
+    width: 100%;
+    font-size: 8.5px;
+    color: #831843;
+    text-align: center;
+    margin-bottom: 2px;
 }
 
 .vaccine-box b {
-  color: #db2777;
-  font-size: 10.5px;
-  display: block;
-  margin-bottom: 1px;
+    color: #db2777;
+    font-size: 9px;
+    display: block;
 }
 
 .vaccine-schedule {
-  font-size: 9.5px;
-  color: #9d174d;
-  margin-top: 1px;
+    font-size: 8px;
+    color: #9d174d;
 }
 
-.controls{margin-top:14px;padding:10px;background:#f8fafc;border-radius:10px;display:flex;gap:8px;justify-content:center;width:100%}
-button{border:0;border-radius:8px;padding:8px 12px;background:#0f766e;color:#fff;font-weight:bold;cursor:pointer;font-size:13px}
-button.gray{background:#64748b}
+/* Modal Popup Layar Penuh (Zoom / Kaca Pembesar) */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background: #ffffff;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    border: 3px solid #f472b6;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    transform: scale(0.95);
+    transition: transform 0.25s ease;
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #fce7f3;
+    padding-bottom: 8px;
+}
+
+.modal-header h2 {
+    color: #db2777;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.btn-close-modal {
+    background: #fee2e2;
+    color: #991b1b;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-table-wrap {
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1.5px solid #fce7f3;
+}
+
+.modal-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: #fff;
+}
+
+.modal-table th, .modal-table td {
+    border: 1px solid #fce7f3;
+    padding: 8px 6px;
+    text-align: center;
+}
+
+.modal-table th {
+    background: #f472b6;
+    color: white;
+    font-weight: 600;
+}
+
+.modal-table th:first-child, .modal-table td:first-child {
+    text-align: left;
+    background: #f472b6;
+    color: white;
+    font-weight: 600;
+    width: 35%;
+    padding-left: 10px;
+}
+
+.modal-vaccine {
+    background: #fdf2f8;
+    border: 1.5px solid #fce7f3;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 12px;
+    color: #831843;
+    text-align: center;
+}
+
+.modal-vaccine b {
+    color: #db2777;
+    font-size: 13px;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.modal-vaccine .vaccine-schedule {
+    font-size: 11px;
+    color: #9d174d;
+    margin-top: 4px;
+}
+
+.controls {
+    flex-shrink: 0;
+    padding: 4px 0;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+}
+
+button.action-btn {
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 14px;
+    background: #0f766e;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+button.action-btn.gray {
+    background: #64748b;
+}
 
 @media print {
-  body { background: #fff; }
-  .app { padding: 0; max-width: 100%; }
-  h1, .note, .controls, .pointer, .wheel, .btn-expand { display: none !important; }
-  .stage { display: block; }
-  .wheel-area { width: 100%; aspect-ratio: auto; height: auto; border: none; }
-  .wheel-center-display {
-    position: static;
-    transform: none;
-    width: 100%;
-    height: auto;
-    box-shadow: none;
-    border: none;
-    background: #fff;
-    padding: 0;
-    pointer-events: auto;
-  }
-  .content-card {
-    border: nil;
-    box-shadow: none;
-    padding: 0;
-  }
+    body { background: #fff; overflow: auto; height: auto; }
+    header, .controls, .pointer, .wheel, .btn-expand { display: none !important; }
+    .stage { display: block; max-height: none; }
+    .wheel-area { width: 100%; aspect-ratio: auto; height: auto; border: none; }
+    .wheel-center-display {
+        position: static;
+        transform: none;
+        width: 100%;
+        height: auto;
+    }
+    .content-card {
+        border-radius: 12px;
+        border: 2px solid #f472b6;
+        box-shadow: none;
+        padding: 15px;
+    }
 }
 </style>
 </head>
 <body>
 <div class="app">
-<h1>Diagram Pertumbuhan Anak</h1>
-<div class="note">Geser roda dengan jari untuk melihat detail bulan lainnya.</div>
+    <header>
+        <h1>Diagram Pertumbuhan Anak</h1>
+        <div class="note">Geser roda melingkar atau klik 🔍 untuk memperbesar detail</div>
+    </header>
 
-<div class="stage">
-<div class="wheel-area" id="area">
-  <div class="pointer"><b id="ageText">0 BULAN</b></div>
-  <div class="wheel" id="wheel">
-    <div class="months" id="months"></div>
-  </div>
-  
-  <div class="wheel-center-display" id="centerDisplay">
-    <div class="content-card">
-      <button class="btn-expand" id="btnExpand" onclick="toggleFullscreen()" title="Perbesar Tampilan">🔍</button>
-      <h3 id="centerAgeTitle">0 Bulan</h3>
-      <div class="center-table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Parameter</th>
-              <th class="col-val">Laki-Laki</th>
-              <th class="col-val">Perempuan</th>
-            </tr>
-          </thead>
-          <tbody id="centerDataRows"></tbody>
-        </table>
-      </div>
-      <div class="vaccine-box" id="vaccineInfo">
-        <b>💉 Rekomendasi Vaksin:</b> Hepatitis B0, BCG, Polio 1
-      </div>
+    <div class="stage">
+        <div class="wheel-area" id="area">
+            <div class="pointer"><b id="ageText">0 BULAN</b></div>
+            <div class="wheel" id="wheel">
+                <div class="months" id="months"></div>
+            </div>
+            
+            <div class="wheel-center-display" id="centerDisplay">
+                <div class="content-card">
+                    <button class="btn-expand" id="btnExpand" onclick="openModal(event)">🔍 Detail</button>
+                    <h3 id="centerAgeTitle">0 Bulan</h3>
+                    <div class="center-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th class="col-val">Laki-Laki</th>
+                                    <th class="col-val">Perempuan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="centerDataRows"></tbody>
+                        </table>
+                    </div>
+                    <div class="vaccine-box" id="vaccineInfo">
+                        <b>💉 Vaksin:</b> Hepatitis B0, BCG, Polio 1
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
+
+    <div class="controls">
+        <button class="action-btn" onclick="resetWheel()">↻ Reset 0 Bulan</button>
+        <button class="action-btn gray" onclick="window.print()">🖨 Cetak</button>
+    </div>
 </div>
 
-<div class="controls">
-<button onclick="resetWheel()">↻ Reset 0 Bulan</button>
-<button class="gray" onclick="window.print()">🖨 Cetak</button>
-</div>
+<!-- Modal Overlay Fullscreen -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal-content" id="modalContent">
+        <div class="modal-header">
+            <h2 id="modalTitle">0 Bulan</h2>
+            <button class="btn-close-modal" onclick="closeModalDirect()">✕</button>
+        </div>
+        <div class="modal-table-wrap">
+            <table class="modal-table">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Laki-Laki</th>
+                        <th>Perempuan</th>
+                    </tr>
+                </thead>
+                <tbody id="modalDataRows"></tbody>
+            </table>
+        </div>
+        <div class="modal-vaccine" id="modalVaccineInfo">
+            <b>💉 Rekomendasi Vaksin:</b> Hepatitis B0, BCG, Polio 1
+        </div>
+    </div>
 </div>
 
 <script>
@@ -365,22 +581,46 @@ function calcValues(age, type, sex) {
   };
 }
 
-let age=0, rotation=0, startAngle=0, startRotation=0, dragging=false;
-const wheel=document.getElementById('wheel');
-const area=document.getElementById('area');
-const months=document.getElementById('months');
-const centerDisplay = document.getElementById('centerDisplay');
-const btnExpand = document.getElementById('btnExpand');
+let age = 0, rotation = 0, startAngle = 0, startRotation = 0, dragging = false;
+const wheel = document.getElementById('wheel');
+const area = document.getElementById('area');
+const months = document.getElementById('months');
+const modalOverlay = document.getElementById('modalOverlay');
 
-function toggleFullscreen() {
-  centerDisplay.classList.toggle('fullscreen');
-  if(centerDisplay.classList.contains('fullscreen')){
-    btnExpand.textContent = '✕';
-    btnExpand.title = 'Kecilkan Kembali';
-  } else {
-    btnExpand.textContent = '🔍';
-    btnExpand.title = 'Perbesar Tampilan';
+function openModal(e) {
+  e.stopPropagation();
+  document.getElementById('modalTitle').textContent = age + ' Bulan';
+  
+  const vDetails = getVaccineDetails(age);
+  document.getElementById('modalVaccineInfo').innerHTML = `
+    <b>💉 Rekomendasi Vaksin:</b> ${vDetails.vaccine}
+    <div class="vaccine-schedule">✨ Jadwal Optimal: ${vDetails.best}</div>
+  `;
+  
+  const modalRowsHTML = parameters.map(p => {
+    const boyVal = calcValues(age, p.type, 'boy');
+    const girlVal = calcValues(age, p.type, 'girl');
+    return `
+      <tr>
+        <td><b>${p.name}</b><span style="font-size:11px;color:#64748b;font-weight:normal">(${p.unit})</span></td>
+        <td class="boy">Min: ${boyVal.min}<br><span style="font-weight:normal;color:#64748b">Maks:</span> ${boyVal.max}</td>
+        <td class="girl">Min: ${girlVal.min}<br><span style="font-weight:normal;color:#64748b">Maks:</span> ${girlVal.max}</td>
+      </tr>
+    `;
+  }).join('');
+  
+  document.getElementById('modalDataRows').innerHTML = modalRowsHTML;
+  modalOverlay.classList.add('active');
+}
+
+function closeModal(e) {
+  if (e.target === modalOverlay) {
+    modalOverlay.classList.remove('active');
   }
+}
+
+function closeModalDirect() {
+  modalOverlay.classList.remove('active');
 }
 
 const totalSegments = 61;
@@ -412,8 +652,7 @@ function render(){
  
  const vDetails = getVaccineDetails(age);
  document.getElementById('vaccineInfo').innerHTML = `
-   <b>💉 Rekomendasi Vaksin:</b> ${vDetails.vaccine}
-   <div class="vaccine-schedule">✨ ${vDetails.best}</div>
+   <b>💉 Vaksin:</b> ${vDetails.vaccine}
  `;
  
  const rowsHTML = parameters.map(p => {
@@ -444,7 +683,6 @@ function pointerAngle(e){
 }
 
 function down(e){
- if(centerDisplay.classList.contains('fullscreen')) return;
  e.preventDefault();
  dragging = true;
  wheel.classList.add('dragging');
@@ -453,7 +691,7 @@ function down(e){
 }
 
 function move(e){
- if(!dragging || centerDisplay.classList.contains('fullscreen')) return;
+ if(!dragging) return;
  e.preventDefault();
  let a = pointerAngle(e), delta = a - startAngle;
  rotation = startRotation + delta;
