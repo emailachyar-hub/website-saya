@@ -209,7 +209,7 @@
             <span class="mode-label">BB</span>
             <span class="mode-sub">Berat Badan</span>
         </button>
-        <button class="btn-mode" id="btnModeLK" onclick="switchMode('LK')">
+        <button class="btn-mode" id="btnModeLP" onclick="switchMode('LP')">
             <span class="mode-label">LK</span>
             <span class="mode-sub">Lingkar Kepala</span>
         </button>
@@ -244,14 +244,14 @@
         const modesConfig = {
             'TB': { title1: 'Cm', title2: 'Mm', max1: 250, max2: 9 },
             'BB': { title1: 'Kg', title2: 'Ons', max1: 150, max2: 9 },
-            'LK': { title1: 'Cm', title2: 'Mm', max1: 100, max2: 9 }
+            'LP': { title1: 'Cm', title2: 'Mm', max1: 100, max2: 9 }
         };
 
         // Menyimpan status nilai aktif per mode
         const state = {
             'TB': { 1: 50, 2: 0 },
             'BB': { 1: 3,  2: 0 },
-            'LK': { 1: 35, 2: 0 }
+            'LP': { 1: 35, 2: 0 }
         };
 
         const itemHeight = 130;
@@ -263,7 +263,7 @@
             document.querySelectorAll('.btn-mode').forEach(btn => btn.classList.remove('active'));
             if (mode === 'TB') document.getElementById('btnModeTB').classList.add('active');
             if (mode === 'BB') document.getElementById('btnModeBB').classList.add('active');
-            if (mode === 'LK') document.getElementById('btnModeLK').classList.add('active');
+            if (mode === 'LP') document.getElementById('btnModeLP').classList.add('active');
 
             // Update Judul Kolom
             document.getElementById('titleCol1').innerText = modesConfig[mode].title1;
@@ -288,10 +288,10 @@
                 div.innerText = i;
                 drum.appendChild(div);
             }
-            updateRolLKosition(colId, false);
+            updateRollPosition(colId, false);
         }
 
-        function updateRolLKosition(colId, smooth = true) {
+        function updateRollPosition(colId, smooth = true) {
             const drum = document.getElementById(`rollDrum${colId}`);
             const container = document.getElementById(`rollContainer${colId}`);
             const currentVal = state[currentMode][colId];
@@ -322,7 +322,7 @@
             
             if (newVal >= 0 && newVal <= rangeMax) {
                 state[currentMode][colId] = newVal;
-                updateRolLKosition(colId, true);
+                updateRollPosition(colId, true);
                 resetSaveState();
             }
         }
