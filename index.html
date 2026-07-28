@@ -35,9 +35,10 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-end; /* Memindahkan kotak ke area bawah */
             align-items: center;
             padding: 10px;
+            padding-bottom: 50px; /* Jarak dari footer agar tidak menempel */
             border-right: 1px solid #1e293b;
             position: relative;
             touch-action: none;
@@ -63,7 +64,6 @@
             height: 130px;
             overflow: hidden;
             display: flex;
-            /* align-items dicabut agar posisi top absolute presisi dari atas */
             background: rgba(15, 23, 42, 0.95);
             border-radius: 16px;
             border: 2px solid rgba(56, 189, 248, 0.5);
@@ -75,7 +75,7 @@
             flex-direction: column;
             align-items: center;
             position: absolute;
-            top: 0; /* INI KUNCI AGAR ANGKA TIDAK TERDORONG KE LUAR LAYAR */
+            top: 0; 
             left: 0;
             width: 100%;
             will-change: transform;
@@ -88,14 +88,13 @@
             justify-content: center;
             font-size: 4.5rem;
             font-weight: 700;
-            color: #1e293b; /* Diganti dari transparent agar transisi lebih smooth */
+            color: #1e293b; 
             opacity: 0;
             pointer-events: none;
             width: 100%;
             transition: all 0.15s ease;
         }
 
-        /* Ukuran dibesarkan menjadi 6rem sesuai instruksi */
         .roll-item.active {
             color: #38bdf8 !important; 
             opacity: 1 !important;
@@ -263,7 +262,8 @@
                 
                 if (Math.abs(deltaY) >= itemHeight / 2) {
                     let steps = Math.trunc(Math.abs(deltaY) / (itemHeight / 2));
-                    let direction = deltaY > 0 ? -1 : 1;
+                    // Logika diubah: Swipe ke bawah (deltaY > 0) = angka NAIK (positif 1)
+                    let direction = deltaY > 0 ? 1 : -1;
                     
                     adjustValue(colId, direction * (steps > 0 ? 1 : 0));
                     startY = currentY;
@@ -276,6 +276,7 @@
 
             container.addEventListener('wheel', (e) => {
                 e.preventDefault();
+                // Scroll ke bawah = angka NAIK
                 let direction = e.deltaY > 0 ? 1 : -1;
                 adjustValue(colId, direction);
             }, { passive: false });
