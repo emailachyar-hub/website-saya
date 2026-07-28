@@ -57,19 +57,18 @@
             margin-bottom: 12px;
         }
 
-        /* Kotak kontainer khusus menampilkan satu angka persis di tengah */
         .roll-container {
             position: relative;
-            width: 130px;
-            height: 110px;
+            width: 150px;
+            height: 130px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(15, 23, 42, 0.9);
-            border-radius: 14px;
-            border: 2px solid rgba(56, 189, 248, 0.4);
-            box-shadow: inset 0 4px 16px rgba(0, 0, 0, 0.8), 0 0 15px rgba(56, 189, 248, 0.1);
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 16px;
+            border: 2px solid rgba(56, 189, 248, 0.5);
+            box-shadow: inset 0 4px 16px rgba(0, 0, 0, 0.9), 0 0 20px rgba(56, 189, 248, 0.15);
         }
 
         .roll-drum {
@@ -82,26 +81,25 @@
         }
 
         .roll-item {
-            height: 110px;
+            height: 130px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem;
+            font-size: 4.5rem;
             font-weight: 700;
-            color: transparent; /* Angka di luar pilihan disembunyikan total */
+            color: transparent; 
             opacity: 0;
             pointer-events: none;
             width: 100%;
             transition: transform 0.15s ease;
         }
 
-        /* Hanya angka yang aktif yang muncul dengan warna menyala terang */
         .roll-item.active {
             color: #38bdf8 !important; 
             opacity: 1 !important;
-            font-size: 4.2rem;
-            font-weight: 800;
-            text-shadow: 0 0 20px rgba(56, 189, 248, 0.8), 0 0 40px rgba(56, 189, 248, 0.4);
+            font-size: 5rem;
+            font-weight: 900;
+            text-shadow: 0 0 25px rgba(56, 189, 248, 0.9), 0 0 50px rgba(56, 189, 248, 0.4);
         }
 
         .hint {
@@ -111,7 +109,6 @@
             margin-top: 12px;
         }
 
-        /* Footer Bar & Tombol Simpan di Bawah */
         .footer-bar {
             width: 100%;
             padding: 15px 20px;
@@ -150,14 +147,14 @@
         }
 
         .btn-save.unclicked {
-            background-color: #ef4444; /* Merah */
+            background-color: #ef4444; 
         }
         .btn-save.unclicked:hover {
             background-color: #dc2626;
         }
 
         .btn-save.clicked {
-            background-color: #22c55e; /* Hijau */
+            background-color: #22c55e; 
         }
         .btn-save.clicked:hover {
             background-color: #16a34a;
@@ -167,7 +164,6 @@
 <body>
 
     <div class="container">
-        <!-- Kolom 1 -->
         <div class="column" id="col1">
             <div class="column-title">Kolom 1</div>
             <div class="roll-container" id="rollContainer1">
@@ -176,7 +172,6 @@
             <div class="hint">Swipe / Scroll</div>
         </div>
 
-        <!-- Kolom 2 -->
         <div class="column" id="col2">
             <div class="column-title">Kolom 2</div>
             <div class="roll-container" id="rollContainer2">
@@ -186,7 +181,6 @@
         </div>
     </div>
 
-    <!-- Footer Bar dengan Info Nilai & Tombol Simpan -->
     <div class="footer-bar">
         <div class="saved-display" id="savedDisplay">Nilai terpilih: Kolom 1 = 0, Kolom 2 = 0</div>
         <button id="saveBtn" class="btn-save unclicked" onclick="handleSave()">SIMPAN DATA</button>
@@ -200,7 +194,7 @@
 
         const rangeMin = -50;
         const rangeMax = 50;
-        const itemHeight = 110;
+        const itemHeight = 130;
 
         function initRoll(colId) {
             const drum = document.getElementById(`rollDrum${colId}`);
@@ -221,7 +215,7 @@
             const currentVal = state[colId];
             const offsetIndex = currentVal - rangeMin;
             
-            const containerHeight = container.clientHeight || 110;
+            const containerHeight = container.clientHeight || 130;
             const centerY = (containerHeight / 2) - (itemHeight / 2);
             const translateY = centerY - (offsetIndex * itemHeight);
 
