@@ -54,21 +54,22 @@
             letter-spacing: 1px;
             color: #94a3b8;
             text-transform: uppercase;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
-        /* Container hanya memperlihatkan SATU angka aktif secara penuh */
+        /* Kotak kontainer khusus menampilkan satu angka persis di tengah */
         .roll-container {
             position: relative;
-            width: 100%;
-            height: 100px; /* Dikecilkan pas untuk satu angka */
+            width: 130px;
+            height: 110px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(15, 23, 42, 0.6);
-            border-radius: 12px;
-            border: 1px solid rgba(56, 189, 248, 0.2);
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 14px;
+            border: 2px solid rgba(56, 189, 248, 0.4);
+            box-shadow: inset 0 4px 16px rgba(0, 0, 0, 0.8), 0 0 15px rgba(56, 189, 248, 0.1);
         }
 
         .roll-drum {
@@ -81,32 +82,33 @@
         }
 
         .roll-item {
-            height: 100px;
+            height: 110px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3.8rem;
+            font-size: 4rem;
             font-weight: 700;
-            color: #1e293b; /* Angka tidak aktif disembunyikan/samarkan */
+            color: transparent; /* Angka di luar pilihan disembunyikan total */
             opacity: 0;
-            transition: all 0.15s ease;
+            pointer-events: none;
             width: 100%;
+            transition: transform 0.15s ease;
         }
 
-        /* Hanya angka aktif yang muncul dan menyala terang */
+        /* Hanya angka yang aktif yang muncul dengan warna menyala terang */
         .roll-item.active {
-            color: #38bdf8; 
-            opacity: 1;
+            color: #38bdf8 !important; 
+            opacity: 1 !important;
             font-size: 4.2rem;
             font-weight: 800;
-            text-shadow: 0 0 20px rgba(56, 189, 248, 0.7), 0 0 40px rgba(56, 189, 248, 0.3);
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.8), 0 0 40px rgba(56, 189, 248, 0.4);
         }
 
         .hint {
             font-size: 0.75rem;
             color: #64748b;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 12px;
         }
 
         /* Footer Bar & Tombol Simpan di Bawah */
@@ -198,7 +200,7 @@
 
         const rangeMin = -50;
         const rangeMax = 50;
-        const itemHeight = 100;
+        const itemHeight = 110;
 
         function initRoll(colId) {
             const drum = document.getElementById(`rollDrum${colId}`);
@@ -219,7 +221,7 @@
             const currentVal = state[colId];
             const offsetIndex = currentVal - rangeMin;
             
-            const containerHeight = container.clientHeight || 100;
+            const containerHeight = container.clientHeight || 110;
             const centerY = (containerHeight / 2) - (itemHeight / 2);
             const translateY = centerY - (offsetIndex * itemHeight);
 
