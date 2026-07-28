@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Input Angka 2 Kolom (Giant Roll & Save)</title>
+    <title>Input Angka 2 Kolom (Compact Roll)</title>
     <style>
         * {
             box-sizing: border-box;
@@ -35,9 +35,9 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            padding: 15px 10px;
+            padding: 20px 10px;
             border-right: 1px solid #1e293b;
             position: relative;
             touch-action: none;
@@ -49,19 +49,20 @@
         }
 
         .column-title {
-            font-size: 0.9rem;
+            font-size: 1rem;
             font-weight: 600;
             letter-spacing: 1.5px;
             color: #94a3b8;
             text-transform: uppercase;
+            margin-bottom: auto;
+            padding-top: 20px;
         }
 
-        /* Container Roll Angka yang Diperbesar (Fokus 1 Angka Utama) */
+        /* Container Roll Angka yang Lebih Padat (Compact) */
         .roll-container {
             position: relative;
             width: 100%;
-            flex: 1;
-            max-height: 280px;
+            height: 140px; /* Diperkecil agar pas dengan tinggi angka */
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -69,19 +70,19 @@
             margin: auto 0;
         }
 
-        /* Garis batas area sorot angka */
+        /* Garis batas area sorot angka yang diperkecil menyesuaikan nomor */
         .roll-container::before, .roll-container::after {
             content: '';
             position: absolute;
-            left: 5%;
-            right: 5%;
+            left: 15%;
+            right: 15%;
             height: 2px;
-            background: rgba(56, 189, 248, 0.2);
+            background: rgba(56, 189, 248, 0.4);
             z-index: 2;
             pointer-events: none;
         }
-        .roll-container::before { top: 15px; }
-        .roll-container::after { bottom: 15px; }
+        .roll-container::before { top: 10px; }
+        .roll-container::after { bottom: 10px; }
 
         .roll-drum {
             display: flex;
@@ -92,50 +93,30 @@
         }
 
         .roll-item {
-            height: 120px; /* Tinggi item diatur besar agar fokus 1 angka */
+            height: 90px; /* Ukuran tinggi baris angka */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 5rem; 
-            font-weight: 800;
-            color: #334155;
-            opacity: 0.15;
+            font-size: 4rem; 
+            font-weight: 700;
+            color: #7dd3fc; /* Warna biru terang (bukan abu-abu) */
+            opacity: 0.4;
             transition: all 0.15s ease;
         }
 
         .roll-item.active {
             color: #38bdf8;
             opacity: 1;
-            font-size: 7rem; /* Ukuran angka aktif yang sangat besar mendominasi kolom */
-            text-shadow: 0 6px 24px rgba(56, 189, 248, 0.4);
+            font-size: 5.5rem; /* Ukuran angka aktif yang besar dan menonjol */
+            text-shadow: 0 4px 16px rgba(56, 189, 248, 0.4);
         }
 
         .hint {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             color: #64748b;
             text-align: center;
-            margin-top: 2px;
-        }
-
-        .btn {
-            background-color: #334155;
-            color: #f8fafc;
-            border: none;
-            width: 65px;
-            height: 65px;
-            border-radius: 50%;
-            font-size: 1.6rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.4);
-            transition: transform 0.1s ease, background-color 0.2s ease;
-        }
-
-        .btn:active {
-            transform: scale(0.92);
-            background-color: #475569;
+            margin-top: auto;
+            padding-bottom: 20px;
         }
 
         /* Tombol Simpan di Bagian Bawah */
@@ -190,28 +171,22 @@
         <div class="column" id="col1">
             <div class="column-title">Kolom 1</div>
             
-            <button class="btn btn-up" onclick="adjustValue(1, 1)">▲</button>
-            
             <div class="roll-container" id="rollContainer1">
                 <div class="roll-drum" id="rollDrum1"></div>
             </div>
             
-            <button class="btn btn-down" onclick="adjustValue(1, -1)">▼</button>
-            <div class="hint">Swipe / Tombol</div>
+            <div class="hint">Swipe / Scroll ke atas & bawah</div>
         </div>
 
         <!-- Kolom 2 -->
         <div class="column" id="col2">
             <div class="column-title">Kolom 2</div>
             
-            <button class="btn btn-up" onclick="adjustValue(2, 1)">▲</button>
-            
             <div class="roll-container" id="rollContainer2">
                 <div class="roll-drum" id="rollDrum2"></div>
             </div>
             
-            <button class="btn btn-down" onclick="adjustValue(2, -1)">▼</button>
-            <div class="hint">Swipe / Tombol</div>
+            <div class="hint">Swipe / Scroll ke atas & bawah</div>
         </div>
     </div>
 
@@ -221,7 +196,6 @@
     </div>
 
     <script>
-        // Nilai state awal diset default 0
         const state = {
             1: 0,
             2: 0
@@ -229,7 +203,7 @@
 
         const rangeMin = -50;
         const rangeMax = 50;
-        const itemHeight = 120; // Disesuaikan agar pas menampilkan 1 angka besar
+        const itemHeight = 90;
 
         function initRoll(colId) {
             const drum = document.getElementById(`rollDrum${colId}`);
@@ -250,7 +224,7 @@
             const currentVal = state[colId];
             const offsetIndex = currentVal - rangeMin;
             
-            const containerHeight = container.clientHeight || 280;
+            const containerHeight = container.clientHeight || 140;
             const centerY = (containerHeight / 2) - (itemHeight / 2);
             const translateY = centerY - (offsetIndex * itemHeight);
 
@@ -274,7 +248,7 @@
             if (newVal >= rangeMin && newVal <= rangeMax) {
                 state[colId] = newVal;
                 updateRollPosition(colId, true);
-                resetSaveState(); // Tombol berubah merah kembali jika angka diubah
+                resetSaveState();
             }
         }
 
@@ -295,8 +269,8 @@
                 
                 accumulatedDeltaY += deltaY;
 
-                if (Math.abs(accumulatedDeltaY) >= 30) {
-                    let steps = Math.trunc(Math.abs(accumulatedDeltaY) / 30);
+                if (Math.abs(accumulatedDeltaY) >= 25) {
+                    let steps = Math.trunc(Math.abs(accumulatedDeltaY) / 25);
                     let direction = accumulatedDeltaY > 0 ? 1 : -1; 
                     
                     adjustValue(colId, direction * steps);
@@ -320,7 +294,7 @@
             btn.classList.remove('unclicked');
             btn.classList.add('clicked');
             btn.innerText = 'DATA BERHASIL DISIMPAN ✓';
-            console.log("Data disimpan:", state);
+            console.log("Disimpan:", state);
         }
 
         function resetSaveState() {
@@ -332,7 +306,6 @@
             }
         }
 
-        // Inisialisasi awal
         initRoll(1);
         initRoll(2);
         setupSwipeRoll(1);
