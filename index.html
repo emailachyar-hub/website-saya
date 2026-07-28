@@ -38,7 +38,7 @@
             justify-content: flex-end; /* Memindahkan kotak ke area bawah */
             align-items: center;
             padding: 10px;
-            padding-bottom: 50px; /* Jarak dari footer agar tidak menempel */
+            padding-bottom: 30px; /* Jarak bawah */
             border-right: 1px solid #1e293b;
             position: relative;
             touch-action: none;
@@ -109,57 +109,6 @@
             text-align: center;
             margin-top: 12px;
         }
-
-        .footer-bar {
-            width: 100%;
-            padding: 15px 20px;
-            background-color: #07090e;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border-top: 1px solid #1e293b;
-            gap: 8px;
-        }
-
-        .saved-display {
-            font-size: 0.9rem;
-            color: #38bdf8;
-            font-weight: 600;
-            min-height: 20px;
-            text-align: center;
-        }
-
-        .btn-save {
-            width: 100%;
-            max-width: 400px;
-            padding: 12px;
-            font-size: 1rem;
-            font-weight: 700;
-            color: #ffffff;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            transition: background-color 0.2s ease, transform 0.1s ease;
-        }
-
-        .btn-save:active {
-            transform: scale(0.98);
-        }
-
-        .btn-save.unclicked {
-            background-color: #ef4444; 
-        }
-        .btn-save.unclicked:hover {
-            background-color: #dc2626;
-        }
-
-        .btn-save.clicked {
-            background-color: #22c55e; 
-        }
-        .btn-save.clicked:hover {
-            background-color: #16a34a;
-        }
     </style>
 </head>
 <body>
@@ -180,11 +129,6 @@
             </div>
             <div class="hint">Swipe / Scroll</div>
         </div>
-    </div>
-
-    <div class="footer-bar">
-        <div class="saved-display" id="savedDisplay">Nilai terpilih: Kolom 1 = 0, Kolom 2 = 0</div>
-        <button id="saveBtn" class="btn-save unclicked" onclick="handleSave()">SIMPAN DATA</button>
     </div>
 
     <script>
@@ -240,7 +184,6 @@
             if (newVal >= rangeMin && newVal <= rangeMax) {
                 state[colId] = newVal;
                 updateRollPosition(colId, true);
-                resetSaveState();
             }
         }
 
@@ -252,7 +195,6 @@
             container.addEventListener('touchstart', (e) => {
                 isDragging = true;
                 startY = e.touches[0].clientY;
-                resetSaveState();
             }, { passive: true });
 
             container.addEventListener('touchmove', (e) => {
@@ -280,28 +222,6 @@
                 let direction = e.deltaY > 0 ? 1 : -1;
                 adjustValue(colId, direction);
             }, { passive: false });
-        }
-
-        function handleSave() {
-            const btn = document.getElementById('saveBtn');
-            const display = document.getElementById('savedDisplay');
-            
-            btn.classList.remove('unclicked');
-            btn.classList.add('clicked');
-            btn.innerText = 'DATA BERHASIL DISIMPAN ✓';
-            display.innerText = `Tersimpan: Kolom 1 = ${state[1]}, Kolom 2 = ${state[2]}`;
-            console.log("Disimpan:", state);
-        }
-
-        function resetSaveState() {
-            const btn = document.getElementById('saveBtn');
-            const display = document.getElementById('savedDisplay');
-            if (btn.classList.contains('clicked')) {
-                btn.classList.remove('clicked');
-                btn.classList.add('unclicked');
-                btn.innerText = 'SIMPAN DATA';
-                display.innerText = `Nilai terpilih: Kolom 1 = ${state[1]}, Kolom 2 = ${state[2]}`;
-            }
         }
 
         initRoll(1);
