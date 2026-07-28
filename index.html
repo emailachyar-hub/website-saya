@@ -38,7 +38,7 @@
             justify-content: flex-end; 
             align-items: center;
             padding: 10px;
-            padding-bottom: 90px; /* Dinaikkan sedikit lagi dari bawah */
+            padding-bottom: 90px;
             border-right: 1px solid #1e293b;
             position: relative;
             touch-action: none;
@@ -122,19 +122,19 @@
             border-top: 1px solid #1e293b;
         }
 
-        /* Tombol simpan diperbesar (padding, font-size, dan max-width) */
+        /* Ukuran tombol simpan diperbesar lagi */
         .btn-save {
             width: 100%;
-            max-width: 500px;
-            padding: 16px 24px;
-            font-size: 1.25rem;
+            max-width: 600px;
+            padding: 20px 28px;
+            font-size: 1.4rem;
             font-weight: 800;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
             color: #ffffff;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             cursor: pointer;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
             transition: background-color 0.2s ease, transform 0.1s ease;
         }
 
@@ -153,6 +153,85 @@
             background-color: #22c55e; 
         }
         .btn-save.clicked:hover {
+            background-color: #16a34a;
+        }
+
+        /* Modal Overlay Konfirmasi */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+
+        .modal-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .modal-box {
+            background: #111827;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 24px;
+            width: 85%;
+            max-width: 340px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 20px;
+        }
+
+        .modal-btns {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-modal {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-modal:active {
+            transform: scale(0.96);
+        }
+
+        .btn-no {
+            background-color: #334155;
+            color: #f8fafc;
+        }
+        .btn-no:hover {
+            background-color: #475569;
+        }
+
+        .btn-yes {
+            background-color: #22c55e;
+            color: #ffffff;
+        }
+        .btn-yes:hover {
             background-color: #16a34a;
         }
     </style>
@@ -179,6 +258,17 @@
 
     <div class="footer-bar">
         <button id="saveBtn" class="btn-save unclicked" onclick="handleSave()">SIMPAN DATA</button>
+    </div>
+
+    <!-- Modal Konfirmasi -->
+    <div class="modal-overlay hidden" id="modalOverlay">
+        <div class="modal-box">
+            <div class="modal-title">Simpan Data?</div>
+            <div class="modal-btns">
+                <button class="btn-modal btn-no" onclick="cancelSave()">Tidak</button>
+                <button class="btn-modal btn-yes" onclick="confirmSave()">Iya</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -275,6 +365,18 @@
         }
 
         function handleSave() {
+            // Menampilkan dialog konfirmasi
+            document.getElementById('modalOverlay').classList.remove('hidden');
+        }
+
+        function cancelSave() {
+            // Menutup dialog konfirmasi tanpa menyimpan
+            document.getElementById('modalOverlay').classList.add('hidden');
+        }
+
+        function confirmSave() {
+            // Menutup modal dan mengubah status tombol menjadi tersimpan (hijau)
+            document.getElementById('modalOverlay').classList.add('hidden');
             const btn = document.getElementById('saveBtn');
             btn.classList.remove('unclicked');
             btn.classList.add('clicked');
