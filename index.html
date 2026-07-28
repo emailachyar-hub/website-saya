@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Input Angka 2 Kolom (Compact Roll)</title>
+    <title>Input Angka 2 Kolom (Drum Picker)</title>
     <style>
         * {
             box-sizing: border-box;
@@ -18,7 +18,7 @@
             height: 100%;
             overflow: hidden;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0f172a;
+            background-color: #0b0f19;
             color: #f8fafc;
             display: flex;
             flex-direction: column;
@@ -37,11 +37,11 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px 10px;
+            padding: 10px;
             border-right: 1px solid #1e293b;
             position: relative;
             touch-action: none;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background: linear-gradient(180deg, #111827 0%, #0b0f19 100%);
         }
 
         .column:last-child {
@@ -49,106 +49,113 @@
         }
 
         .column-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             color: #94a3b8;
             text-transform: uppercase;
-            margin-bottom: auto;
-            padding-top: 20px;
+            margin-bottom: 10px;
         }
 
-        /* Container Roll Angka yang Lebih Padat (Compact) */
+        /* Drum Picker Container */
         .roll-container {
             position: relative;
             width: 100%;
-            height: 140px; /* Diperkecil agar pas dengan tinggi angka */
+            height: 220px; /* Tinggi kontainer menampilkan angka aktif + setengah angka atas/bawah */
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: auto 0;
         }
 
-        /* Garis batas area sorot angka yang diperkecil menyesuaikan nomor */
+        /* Garis batas area aktif di tengah */
         .roll-container::before, .roll-container::after {
             content: '';
             position: absolute;
-            left: 15%;
-            right: 15%;
+            left: 10%;
+            right: 10%;
             height: 2px;
-            background: rgba(56, 189, 248, 0.4);
+            background: rgba(56, 189, 248, 0.3);
             z-index: 2;
             pointer-events: none;
         }
-        .roll-container::before { top: 10px; }
-        .roll-container::after { bottom: 10px; }
+        .roll-container::before { top: 60px; }
+        .roll-container::after { bottom: 60px; }
 
         .roll-drum {
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+            position: absolute;
             width: 100%;
+            will-change: transform;
         }
 
         .roll-item {
-            height: 90px; /* Ukuran tinggi baris angka */
+            height: 50px; /* Tinggi baris per angka */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem; 
-            font-weight: 700;
-            color: #7dd3fc; /* Warna biru terang (bukan abu-abu) */
-            opacity: 0.4;
-            transition: all 0.15s ease;
+            font-size: 2rem;
+            font-weight: 600;
+            color: #64748b; /* Warna angka tidak aktif yang lembut dan jelas */
+            transition: color 0.1s ease, font-size 0.1s ease;
+            width: 100%;
         }
 
+        /* Angka aktif di tengah dengan warna terang menyala tapi nyaman */
         .roll-item.active {
-            color: #38bdf8;
-            opacity: 1;
-            font-size: 5.5rem; /* Ukuran angka aktif yang besar dan menonjol */
-            text-shadow: 0 4px 16px rgba(56, 189, 248, 0.4);
+            color: #38bdf8; 
+            font-size: 3.2rem;
+            font-weight: 700;
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
         }
 
         .hint {
             font-size: 0.75rem;
             color: #64748b;
             text-align: center;
-            margin-top: auto;
-            padding-bottom: 20px;
+            margin-top: 10px;
         }
 
-        /* Tombol Simpan di Bagian Bawah */
+        /* Footer Bar & Tombol Simpan di Bawah */
         .footer-bar {
             width: 100%;
             padding: 15px 20px;
-            background-color: #090d16;
+            background-color: #07090e;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             border-top: 1px solid #1e293b;
+            gap: 8px;
+        }
+
+        .saved-display {
+            font-size: 0.9rem;
+            color: #38bdf8;
+            font-weight: 600;
+            min-height: 20px;
+            text-align: center;
         }
 
         .btn-save {
             width: 100%;
             max-width: 400px;
-            padding: 14px;
-            font-size: 1.1rem;
+            padding: 12px;
+            font-size: 1rem;
             font-weight: 700;
             color: #ffffff;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            transition: background-color 0.3s ease, transform 0.1s ease;
+            transition: background-color 0.2s ease, transform 0.1s ease;
         }
 
         .btn-save:active {
             transform: scale(0.98);
         }
 
-        /* Warna Tombol Berdasarkan Status Klik */
         .btn-save.unclicked {
             background-color: #ef4444; /* Merah */
         }
@@ -170,28 +177,25 @@
         <!-- Kolom 1 -->
         <div class="column" id="col1">
             <div class="column-title">Kolom 1</div>
-            
             <div class="roll-container" id="rollContainer1">
                 <div class="roll-drum" id="rollDrum1"></div>
             </div>
-            
-            <div class="hint">Swipe / Scroll ke atas & bawah</div>
+            <div class="hint">Swipe / Scroll</div>
         </div>
 
         <!-- Kolom 2 -->
         <div class="column" id="col2">
             <div class="column-title">Kolom 2</div>
-            
             <div class="roll-container" id="rollContainer2">
                 <div class="roll-drum" id="rollDrum2"></div>
             </div>
-            
-            <div class="hint">Swipe / Scroll ke atas & bawah</div>
+            <div class="hint">Swipe / Scroll</div>
         </div>
     </div>
 
-    <!-- Footer Bar dengan Tombol Simpan -->
+    <!-- Footer Bar dengan Info Nilai & Tombol Simpan -->
     <div class="footer-bar">
+        <div class="saved-display" id="savedDisplay">Nilai terpilih: Kolom 1 = 0, Kolom 2 = 0</div>
         <button id="saveBtn" class="btn-save unclicked" onclick="handleSave()">SIMPAN DATA</button>
     </div>
 
@@ -203,7 +207,7 @@
 
         const rangeMin = -50;
         const rangeMax = 50;
-        const itemHeight = 90;
+        const itemHeight = 50;
 
         function initRoll(colId) {
             const drum = document.getElementById(`rollDrum${colId}`);
@@ -224,7 +228,7 @@
             const currentVal = state[colId];
             const offsetIndex = currentVal - rangeMin;
             
-            const containerHeight = container.clientHeight || 140;
+            const containerHeight = container.clientHeight || 220;
             const centerY = (containerHeight / 2) - (itemHeight / 2);
             const translateY = centerY - (offsetIndex * itemHeight);
 
@@ -255,54 +259,58 @@
         function setupSwipeRoll(colId) {
             const container = document.getElementById(`rollContainer${colId}`);
             let startY = 0;
-            let accumulatedDeltaY = 0;
+            let isDragging = false;
 
             container.addEventListener('touchstart', (e) => {
+                isDragging = true;
                 startY = e.touches[0].clientY;
-                accumulatedDeltaY = 0;
+                resetSaveState();
             }, { passive: true });
 
             container.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
                 let currentY = e.touches[0].clientY;
                 let deltaY = currentY - startY;
-                startY = currentY;
                 
-                accumulatedDeltaY += deltaY;
-
-                if (Math.abs(accumulatedDeltaY) >= 25) {
-                    let steps = Math.trunc(Math.abs(accumulatedDeltaY) / 25);
-                    let direction = accumulatedDeltaY > 0 ? 1 : -1; 
+                if (Math.abs(deltaY) >= itemHeight / 2) {
+                    let steps = Math.trunc(Math.abs(deltaY) / (itemHeight / 2));
+                    let direction = deltaY > 0 ? -1 : 1;
                     
-                    adjustValue(colId, direction * steps);
-                    accumulatedDeltaY = 0;
+                    adjustValue(colId, direction * (steps > 0 ? 1 : 0));
+                    startY = currentY;
                 }
             }, { passive: true });
 
             container.addEventListener('touchend', () => {
-                accumulatedDeltaY = 0;
+                isDragging = false;
             }, { passive: true });
 
             container.addEventListener('wheel', (e) => {
                 e.preventDefault();
-                let direction = e.deltaY > 0 ? -1 : 1;
+                let direction = e.deltaY > 0 ? 1 : -1;
                 adjustValue(colId, direction);
             }, { passive: false });
         }
 
         function handleSave() {
             const btn = document.getElementById('saveBtn');
+            const display = document.getElementById('savedDisplay');
+            
             btn.classList.remove('unclicked');
             btn.classList.add('clicked');
             btn.innerText = 'DATA BERHASIL DISIMPAN ✓';
+            display.innerText = `Tersimpan: Kolom 1 = ${state[1]}, Kolom 2 = ${state[2]}`;
             console.log("Disimpan:", state);
         }
 
         function resetSaveState() {
             const btn = document.getElementById('saveBtn');
+            const display = document.getElementById('savedDisplay');
             if (btn.classList.contains('clicked')) {
                 btn.classList.remove('clicked');
                 btn.classList.add('unclicked');
                 btn.innerText = 'SIMPAN DATA';
+                display.innerText = `Nilai terpilih: Kolom 1 = ${state[1]}, Kolom 2 = ${state[2]}`;
             }
         }
 
