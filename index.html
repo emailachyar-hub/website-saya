@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Input Angka 2 Kolom (Swipe & Button)</title>
+    <title>Input Angka 2 Kolom (Giant Roll & Save)</title>
     <style>
         * {
             box-sizing: border-box;
@@ -20,12 +20,15 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #0f172a;
             color: #f8fafc;
+            display: flex;
+            flex-direction: column;
         }
 
         .container {
             display: flex;
             width: 100%;
-            height: 100%;
+            flex: 1;
+            overflow: hidden;
         }
 
         .column {
@@ -34,12 +37,11 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            padding: 30px 15px;
+            padding: 15px 10px;
             border-right: 1px solid #1e293b;
             position: relative;
-            touch-action: none; /* Mencegah scroll default saat swipe */
+            touch-action: none;
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            transition: background 0.1s ease;
         }
 
         .column:last-child {
@@ -47,49 +49,87 @@
         }
 
         .column-title {
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 600;
             letter-spacing: 1.5px;
             color: #94a3b8;
             text-transform: uppercase;
         }
 
-        .display-area {
+        /* Container Roll Angka yang Diperbesar (Fokus 1 Angka Utama) */
+        .roll-container {
+            position: relative;
+            width: 100%;
+            flex: 1;
+            max-height: 280px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: auto 0;
+        }
+
+        /* Garis batas area sorot angka */
+        .roll-container::before, .roll-container::after {
+            content: '';
+            position: absolute;
+            left: 5%;
+            right: 5%;
+            height: 2px;
+            background: rgba(56, 189, 248, 0.2);
+            z-index: 2;
+            pointer-events: none;
+        }
+        .roll-container::before { top: 15px; }
+        .roll-container::after { bottom: 15px; }
+
+        .roll-drum {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            flex-grow: 1;
+            transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+            width: 100%;
         }
 
-        .value {
-            font-size: 5rem;
-            font-weight: 700;
+        .roll-item {
+            height: 120px; /* Tinggi item diatur besar agar fokus 1 angka */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem; 
+            font-weight: 800;
+            color: #334155;
+            opacity: 0.15;
+            transition: all 0.15s ease;
+        }
+
+        .roll-item.active {
             color: #38bdf8;
-            margin: 10px 0;
-            text-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+            opacity: 1;
+            font-size: 7rem; /* Ukuran angka aktif yang sangat besar mendominasi kolom */
+            text-shadow: 0 6px 24px rgba(56, 189, 248, 0.4);
         }
 
         .hint {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: #64748b;
             text-align: center;
-            margin-top: 5px;
+            margin-top: 2px;
         }
 
         .btn {
             background-color: #334155;
             color: #f8fafc;
             border: none;
-            width: 70px;
-            height: 70px;
+            width: 65px;
+            height: 65px;
             border-radius: 50%;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.4);
             transition: transform 0.1s ease, background-color 0.2s ease;
         }
 
@@ -98,21 +138,48 @@
             background-color: #475569;
         }
 
-        .btn-up {
-            margin-bottom: 10px;
+        /* Tombol Simpan di Bagian Bawah */
+        .footer-bar {
+            width: 100%;
+            padding: 15px 20px;
+            background-color: #090d16;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 1px solid #1e293b;
         }
 
-        .btn-down {
-            margin-top: 10px;
+        .btn-save {
+            width: 100%;
+            max-width: 400px;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: background-color 0.3s ease, transform 0.1s ease;
         }
 
-        /* Efek visual saat melakukan swipe */
-        .column.swiping-up {
-            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+        .btn-save:active {
+            transform: scale(0.98);
         }
 
-        .column.swiping-down {
-            background: linear-gradient(135deg, #831843 0%, #0f172a 100%);
+        /* Warna Tombol Berdasarkan Status Klik */
+        .btn-save.unclicked {
+            background-color: #ef4444; /* Merah */
+        }
+        .btn-save.unclicked:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-save.clicked {
+            background-color: #22c55e; /* Hijau */
+        }
+        .btn-save.clicked:hover {
+            background-color: #16a34a;
         }
     </style>
 </head>
@@ -123,85 +190,153 @@
         <div class="column" id="col1">
             <div class="column-title">Kolom 1</div>
             
-            <button class="btn btn-up" onclick="changeValue(1, 1)">▲</button>
+            <button class="btn btn-up" onclick="adjustValue(1, 1)">▲</button>
             
-            <div class="display-area">
-                <div class="value" id="val1">0</div>
-                <div class="hint">Swipe ke atas / bawah di area ini</div>
+            <div class="roll-container" id="rollContainer1">
+                <div class="roll-drum" id="rollDrum1"></div>
             </div>
             
-            <button class="btn btn-down" onclick="changeValue(1, -1)">▼</button>
+            <button class="btn btn-down" onclick="adjustValue(1, -1)">▼</button>
+            <div class="hint">Swipe / Tombol</div>
         </div>
 
         <!-- Kolom 2 -->
         <div class="column" id="col2">
             <div class="column-title">Kolom 2</div>
             
-            <button class="btn btn-up" onclick="changeValue(2, 1)">▲</button>
+            <button class="btn btn-up" onclick="adjustValue(2, 1)">▲</button>
             
-            <div class="display-area">
-                <div class="value" id="val2">0</div>
-                <div class="hint">Swipe ke atas / bawah di area ini</div>
+            <div class="roll-container" id="rollContainer2">
+                <div class="roll-drum" id="rollDrum2"></div>
             </div>
             
-            <button class="btn btn-down" onclick="changeValue(2, -1)">▼</button>
+            <button class="btn btn-down" onclick="adjustValue(2, -1)">▼</button>
+            <div class="hint">Swipe / Tombol</div>
         </div>
     </div>
 
+    <!-- Footer Bar dengan Tombol Simpan -->
+    <div class="footer-bar">
+        <button id="saveBtn" class="btn-save unclicked" onclick="handleSave()">SIMPAN DATA</button>
+    </div>
+
     <script>
-        // State menyimpan nilai masing-masing kolom
+        // Nilai state awal diset default 0
         const state = {
             1: 0,
             2: 0
         };
 
-        function changeValue(colId, delta) {
-            state[colId] += delta;
-            document.getElementById(`val${colId}`).innerText = state[colId];
+        const rangeMin = -50;
+        const rangeMax = 50;
+        const itemHeight = 120; // Disesuaikan agar pas menampilkan 1 angka besar
+
+        function initRoll(colId) {
+            const drum = document.getElementById(`rollDrum${colId}`);
+            drum.innerHTML = '';
+            for (let i = rangeMin; i <= rangeMax; i++) {
+                const div = document.createElement('div');
+                div.className = `roll-item ${i === state[colId] ? 'active' : ''}`;
+                div.id = `item_${colId}_${i}`;
+                div.innerText = i;
+                drum.appendChild(div);
+            }
+            updateRollPosition(colId, false);
         }
 
-        // Pengaturan Gesture Swipe per Kolom
-        function setupSwipe(colId) {
-            const colElement = document.getElementById(`col${colId}`);
-            let startY = 0;
-            let startX = 0;
-            const threshold = 30; // Batas minimal jarak swipe (dalam pixel)
+        function updateRollPosition(colId, smooth = true) {
+            const drum = document.getElementById(`rollDrum${colId}`);
+            const container = document.getElementById(`rollContainer${colId}`);
+            const currentVal = state[colId];
+            const offsetIndex = currentVal - rangeMin;
+            
+            const containerHeight = container.clientHeight || 280;
+            const centerY = (containerHeight / 2) - (itemHeight / 2);
+            const translateY = centerY - (offsetIndex * itemHeight);
 
-            colElement.addEventListener('touchstart', (e) => {
-                startY = e.touches[0].clientY;
-                startX = e.touches[0].clientX;
-            }, { passive: true });
+            drum.style.transition = smooth ? 'transform 0.15s cubic-bezier(0.25, 1, 0.5, 1)' : 'none';
+            drum.style.transform = `translateY(${translateY}px)`;
 
-            colElement.addEventListener('touchend', (e) => {
-                let endY = e.changedTouches[0].clientY;
-                let diffY = startY - endY; // Positif jika swipe ke atas, Negatif jika swipe ke bawah
-
-                if (Math.abs(diffY) > threshold) {
-                    if (diffY > 0) {
-                        // Swipe ke Atas -> Tambah nilai
-                        changeValue(colId, 1);
-                        flashFeedback(colElement, 'up');
+            for (let i = rangeMin; i <= rangeMax; i++) {
+                const el = document.getElementById(`item_${colId}_${i}`);
+                if (el) {
+                    if (i === currentVal) {
+                        el.classList.add('active');
                     } else {
-                        // Swipe ke Bawah -> Kurangi nilai
-                        changeValue(colId, -1);
-                        flashFeedback(colElement, 'down');
+                        el.classList.remove('active');
                     }
                 }
+            }
+        }
+
+        function adjustValue(colId, delta) {
+            let newVal = state[colId] + delta;
+            if (newVal >= rangeMin && newVal <= rangeMax) {
+                state[colId] = newVal;
+                updateRollPosition(colId, true);
+                resetSaveState(); // Tombol berubah merah kembali jika angka diubah
+            }
+        }
+
+        function setupSwipeRoll(colId) {
+            const container = document.getElementById(`rollContainer${colId}`);
+            let startY = 0;
+            let accumulatedDeltaY = 0;
+
+            container.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+                accumulatedDeltaY = 0;
             }, { passive: true });
+
+            container.addEventListener('touchmove', (e) => {
+                let currentY = e.touches[0].clientY;
+                let deltaY = currentY - startY;
+                startY = currentY;
+                
+                accumulatedDeltaY += deltaY;
+
+                if (Math.abs(accumulatedDeltaY) >= 30) {
+                    let steps = Math.trunc(Math.abs(accumulatedDeltaY) / 30);
+                    let direction = accumulatedDeltaY > 0 ? 1 : -1; 
+                    
+                    adjustValue(colId, direction * steps);
+                    accumulatedDeltaY = 0;
+                }
+            }, { passive: true });
+
+            container.addEventListener('touchend', () => {
+                accumulatedDeltaY = 0;
+            }, { passive: true });
+
+            container.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                let direction = e.deltaY > 0 ? -1 : 1;
+                adjustValue(colId, direction);
+            }, { passive: false });
         }
 
-        // Efek kedip warna singkat saat swipe berhasil terdeteksi
-        function flashFeedback(element, direction) {
-            const className = direction === 'up' ? 'swiping-up' : 'swiping-down';
-            element.classList.add(className);
-            setTimeout(() => {
-                element.classList.remove(className);
-            }, 150);
+        function handleSave() {
+            const btn = document.getElementById('saveBtn');
+            btn.classList.remove('unclicked');
+            btn.classList.add('clicked');
+            btn.innerText = 'DATA BERHASIL DISIMPAN ✓';
+            console.log("Data disimpan:", state);
         }
 
-        // Inisialisasi gestur untuk kedua kolom
-        setupSwipe(1);
-        setupSwipe(2);
+        function resetSaveState() {
+            const btn = document.getElementById('saveBtn');
+            if (btn.classList.contains('clicked')) {
+                btn.classList.remove('clicked');
+                btn.classList.add('unclicked');
+                btn.innerText = 'SIMPAN DATA';
+            }
+        }
+
+        // Inisialisasi awal
+        initRoll(1);
+        initRoll(2);
+        setupSwipeRoll(1);
+        setupSwipeRoll(2);
     </script>
 </body>
 </html>
